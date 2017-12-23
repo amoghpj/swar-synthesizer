@@ -1,0 +1,6 @@
+>s,>sd,>s,>sd,>sd,pm,p,p,
+m,mr,m,mr,mr,s<d,s,s,
+rr,sm,r,r,pp,md,p,p,
+dd,p>s,d,d,>s>s,d>r,>s,>s,
+>r,>r>s,>r,>sd,>s,dp,d,pm,
+rm,pd,>s,dp,m,rm,s,s

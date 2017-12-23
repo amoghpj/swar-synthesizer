@@ -1,0 +1,4 @@
+sr,rp,pm,pd,
+dd,mp,mr,ss,
+sr,sr,s<d,ss,
+d>s,dp,mr,ss,

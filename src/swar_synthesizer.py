@@ -5,9 +5,8 @@ import struct
 import pyaudio
 
 def swar2freq(swar,basefreq):
-    F=0
-
-    MAPPER={
+    f=0
+    mapper={
         's':{
             'shuddh':basefreq,
             'vakra':basefreq,
@@ -40,38 +39,30 @@ def swar2freq(swar,basefreq):
         
     }
 
-
-    
-    ALLOWEDINPUTS=['s','r','g','m','p','d','n','^','<','>']
+    allowed_inputs=['s','r','g','m','p','d','n','^','<','>']
     whichoctave=''
     whichswar=''
-    
-    if swar[0] in ALLOWEDINPUTS:
-        if len(swar)==1:
-            
-            return MAPPER[swar]['shuddh']
 
+    if swar[0] in allowed_inputs:
+        if len(swar)==1:
+            return mapper[swar]['shuddh']
         elif len(swar)==2:
             if swar[0] in ['<','>']:
-                OCT=swar[0]
-                NOTE=swar[1]
-               
-                return int(octavespecifier(OCT)*float(MAPPER[NOTE]['shuddh']))
-
+                _oct=swar[0]
+                note=swar[1]
+                return int(octavespecifier(_oct)*float(mapper[note]['shuddh']))
             elif swar[0] in ['s','r','g','m','p','d','n']:
-                NOTE=swar[0]
-                return MAPPER[NOTE]['vakra']
+                note=swar[0]
+                return mapper[note]['vakra']
 
         elif len(swar)==3:
+            _oct=swar[0]
+            note=swar[1]
+            sor_v=swar[2]
 
-            OCT=swar[0]
-            NOTE=swar[1]
-            SorV=swar[2]
-
-            return int(octavespecifier(OCT)*float(MAPPER[NOTE]['vakra']))
-
+            return int(octavespecifier(_oct)*float(mapper[note]['vakra']))
     else:
-        return MAPPER['0']
+        return mapper['0']
     
 def octavespecifier(octave):
     
@@ -83,20 +74,20 @@ def octavespecifier(octave):
         return uoctave
 
 
-def wf_specifier(freq,A,SR,D):
+def wf_specifier(freq,a,sr,d):
     # Defines waveform for a given duration and frequency
     wf=[]
     # 5% taper
-    TAPER=0.00
-    for i in range(int((1-TAPER)*D*float(SR))):
-        wf.append(int(A*math.cos(freq*math.pi*float(i)/float(SR))))
-    for i in range(int((TAPER)*D*float(SR))):
+    taper=0.00
+    for i in range(int((1-taper)*D*float(sr))):
+        wf.append(int(A*math.cos(freq*math.pi*float(i)/float(sr))))
+    for i in range(int((taper)*D*float(sr))):
         wf.append(int(0))
-    
+
     return wf
 def play_soundfile(path):
     
-    CHUNK = 100
+    chunk = 100
     
     # if len(sys.argv) < 2:
     #     print("Plays a wave file.\n\nUsage: %s filename.wav" % sys.argv[0])
@@ -111,21 +102,21 @@ def play_soundfile(path):
                     rate=wf.getframerate(),
                     output=True)
     
-    data = wf.readframes(CHUNK)
-    
+    data = wf.readframes(chunk)
+
     while len(data)>0 :
         stream.write(data)
         data = wf.readframes(CHUNK)
-    
+
     stream.stop_stream()
     stream.close()
     
     p.terminate()
     
 def notationreader(swarstring):
-    LOWERSCALEMODIFIER='<'
-    UPPERSCALEMODIFIER='>'
-    premodifiers=[LOWERSCALEMODIFIER,UPPERSCALEMODIFIER]
+    lower_scale_modifier='<'
+    upper_scale_modifier='>'
+    premodifiers=[lower_scale_modifier,upper_scale_modifier]
     postmodifiers=['^','$']
     translatedSwars=[]
     all_swars=[]
@@ -157,48 +148,47 @@ def notationreader(swarstring):
     return translatedSwars 
 
     
-def create_and_save(rawswars,MDuration=1,savename='test_swars',basefreq=440,amplitude=32767,sampleRate=4410):
+def create_and_save(rawswars,m_duration=1,save_name='test_swars',base_freq=440,amplitude=32767,sample_rate=4410):
     # Combines all the waveforms and writes to file
     # By default, will generate one second per entry in list
     bol=notationreader(rawswars)
     print(bol)
-    Length=len(bol)
-    Waveform=[]
-    print(len(bol))
-    for B in bol:
-        
-        if len(B)==1:
-            Waveform+=wf_specifier(swar2freq(B[0],basefreq),amplitude,sampleRate,MDuration)
+    bol_length=len(bol)
+    waveform=[]
+    print(bol_length)
+    for b in bol:
+        if len(b)==1:
+            waveform+=wf_specifier(swar2freq(b[0],base_freq),amplitude,sample_rate,m_duration)
         else:
-            if len(B)==0:
-                L=1
+            if len(b)==0:
+                l=1
             else:
-                L=len(B)
-            subduration=1/float(L)
-            for b in B:
-                Waveform+=wf_specifier(swar2freq(b,basefreq),amplitude,sampleRate,subduration*float(MDuration))
-        
+                l=len(b)
+            sub_duration=1/float(l)
+            for _ in b:
+                waveform+=wf_specifier(swar2freq(_,base_freq),amplitude,sample_rate,sub_duration*float(m_duration))
+
     # Wave file configuration
-    wavef = wave.open(savename+'.wav','w')
+    wavef = wave.open(save_name+'.wav','w')
     wavef.setnchannels(1) # mono
     wavef.setsampwidth(2) 
-    wavef.setframerate(sampleRate)
-    wavef.setnframes(int(Length * sampleRate))
+    wavef.setframerate(sample_rate)
+    wavef.setnframes(int(bol_length * sample_rate))
     
-    for w in Waveform:
+    for w in waveform:
         data = struct.pack('<h', w)
         wavef.writeframesraw( data )
     wavef.close()
 
 #Sargam='s,r,g,m,p,d,n,>s'
-def convert(infP,outfP,freq):
-    SwarString=''
-    with open(infP,'r') as infile:
+def convert(inf_p, outf_p, freq):
+    swar_string=''
+    with open(inf_p,'r') as infile:
         for line in infile.readlines():
-            SwarString+=line.strip("\n")
+            swar_string+=line.strip("\n")
     print("Input string processed as follows:")
     # print(SwarString)
-    create_and_save(SwarString,savename=outfP,MDuration=0.5,basefreq=int(freq))
+    create_and_save(swar_string,save_name=outf_p,m_duration=0.5,base_freq=int(freq))
         
 #owncomp=""">s,>sd,>s,>sd,>sd,pm,p,p,m,mr,m,mr,mr,s<d,s,s,rr,sm,r,r,pp,md,p,p,dd,p>s,d,d,>s>s,d>r,>s,>s,>r,>r>s,>r,>sd,>s,dp,d,pm,rm,pd,>s,dp,m,rm,s"""
 

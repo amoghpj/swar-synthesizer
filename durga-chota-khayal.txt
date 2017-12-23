@@ -1,4 +1,0 @@
-<d,s,s,r,
-m,m,pd,mp,
-d,d,m,m,
-r,r,s,s,

@@ -1,3 +1,9 @@
+import wave
+import math
+import sys
+import struct
+
+
 def swar2freq(swar,basefreq):
     F=0
     MAPPER={

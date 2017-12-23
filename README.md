@@ -5,8 +5,9 @@ The goal is to attempt to synthesize tones from a defined sequence of swars, whi
 I had to install python3-pyaudio to get PyAudio to work.
 
 On Fedora and similar:
-`sudo dnf build-depx python3-pyaudio`
+`sudo dnf build-dep python3-pyaudio`
 
+On Debian systems, replace dnf with `apt-get`
 # Preliminaries
 
 Each swar defines a note. A collection of swars sound melodic when they are destributed across beats, with one or more swars to a beat, also known as a matra. In this project, each beat is separated by a ','.

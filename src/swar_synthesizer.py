@@ -5,43 +5,56 @@ import struct
 import pyaudio
 
 def swar2freq(swar,basefreq):
-    f=0
+    """
+    Contains a dictionary (mapper) that stores relates the swar to 
+    its defined frequency. I have used the Pythagorean ratios
+    to define the relative frequencies based a fixed basefreq
+    variable that is set to 440 Hz by default, but can be speci-
+    fied by the User.
+    This function interprets the octave specifier which halves 
+    or doubles the value of the defined note to shift down or up
+    on the scale.
+    """
+    basefreq_float=float(basefreq) # Perform type conversion once
+    
     mapper={
         's':{
             'shuddh':basefreq,
-            'vakra':basefreq,
+            'vakra':basefreq, # Error handling mechanism.
             },
         'r':{
-            'shuddh':int(1.125*float(basefreq)),
-            'vakra':int(1.058*float(basefreq))
+            'shuddh':int(1.125*basefreq_float),
+            'vakra':int(1.058*basefreq_float)
             },
         'g':{
-            'shuddh':int(1.266*float(basefreq)),
-            'vakra':int(1.188*float(basefreq))
+            'shuddh':int(1.266*basefreq_float),
+            'vakra':int(1.188*basefreq_float)
             },
         'm':{
-            'shuddh':int(1.333*float(basefreq)),
-            'vakra':int(1.412*float(basefreq)),
+            'shuddh':int(1.333*basefreq_float),
+            'vakra':int(1.412*basefreq_float),
             },
         'p':{
-            'shuddh':int(1.5*float(basefreq)),
-            'vakra':int(1.5*float(basefreq)),
+            'shuddh':int(1.5*basefreq_float),
+            'vakra':int(1.5*basefreq_float), # Error handling mechanism
             },
         'd':{
-            'shuddh':int(1.688*float(basefreq)),
-            'vakra':int(1.586*float(basefreq)),
+            'shuddh':int(1.688*basefreq_float),
+            'vakra':int(1.586*basefreq_float),
             },
         'n':{
-            'shuddh':int(1.898*float(basefreq)),
-            'vakra':int(1.78*float(basefreq)),
+            'shuddh':int(1.898*basefreq_float),
+            'vakra':int(1.78*basefreq_float),
             },
         '0':0,
         
     }
 
+    """
+    For any other input, including captialization, this function
+    will specify 0 Hz. Might not be ideal.
+    """
     allowed_inputs=['s','r','g','m','p','d','n','^','<','>']
-    whichoctave=''
-    whichswar=''
 
     if swar[0] in allowed_inputs:
         if len(swar)==1:
@@ -65,7 +78,12 @@ def swar2freq(swar,basefreq):
         return mapper['0']
     
 def octavespecifier(octave):
-    
+    """
+    Helper function for swar2freq().
+    This can be later modified to interpret further lower and 
+    higher octaves if the need arises, and not just the 
+    adjacent octaves.
+    """
     loctave=0.5
     uoctave=2.0
     if octave=='<':
@@ -75,19 +93,42 @@ def octavespecifier(octave):
 
 
 def wf_specifier(freq,a,sr,d):
+
+    """
+    Function which takes the following waveform paramters
+    and generates it explicitly.
+    1. Frequency - freq
+    2. Amplitude - a
+    3. Sample Rate - sr
+    4. Duration of each beat or matra - d
+    
+    This isn't ideal, and the waveform should be user-defined
+    input. 
+
+    I introduced the variable taper to play around with the 
+    transition from one note to the other. 0% taper makes 
+    the transition abrupt, while 5% makes it sound more discrete.
+    In the future, I would like to define a function that smoothes
+    out each transition to give a more analog feel.
+    """
     # Defines waveform for a given duration and frequency
+    
     wf=[]
-    # 5% taper
-    taper=0.00
+    taper=0.00 # A 5% taper makes each note sound distinct.
     for i in range(int((1-taper)*D*float(sr))):
         wf.append(int(A*math.cos(freq*math.pi*float(i)/float(sr))))
     for i in range(int((taper)*D*float(sr))):
         wf.append(int(0))
 
     return wf
+
 def play_soundfile(path):
-    
-    chunk = 100
+    """
+    This code is lifted directly from the PyAudio site.
+    It seemes to be truncating the final beat??
+    Ask @reckoner165 about how to fix this problem.
+    """
+    chunk = 100 # Does this affect performance?
     
     # if len(sys.argv) < 2:
     #     print("Plays a wave file.\n\nUsage: %s filename.wav" % sys.argv[0])
@@ -114,10 +155,17 @@ def play_soundfile(path):
     p.terminate()
     
 def notationreader(swarstring):
+    """
+    Function to interpret the swar string.
+    Checks to see if a prefix or suffix exists for a 
+    given note/swar. Parses the input string and represents
+    each beat as a list of notes contained in the beat.
+    Note: Each beat is specified by a comma (',') in the input.
+    """
     lower_scale_modifier='<'
     upper_scale_modifier='>'
     premodifiers=[lower_scale_modifier,upper_scale_modifier]
-    postmodifiers=['^','$']
+    postmodifiers=['^'] 
     translatedSwars=[]
     all_swars=[]
     single_swar=''
@@ -149,6 +197,14 @@ def notationreader(swarstring):
 
     
 def create_and_save(rawswars,m_duration=1,save_name='test_swars',base_freq=440,amplitude=32767,sample_rate=4410):
+    """
+    Function that takes a single input string and 
+    converts it to list beats. This is accomplished
+    by calling notationreader().
+    Next, it calls wf_specifier() to generate the waveform,
+    according to the frequency specified by swar2freq().
+    Finally, it writes the .wav file using the wave module.
+    """
     # Combines all the waveforms and writes to file
     # By default, will generate one second per entry in list
     bol=notationreader(rawswars)
@@ -180,8 +236,17 @@ def create_and_save(rawswars,m_duration=1,save_name='test_swars',base_freq=440,a
         wavef.writeframesraw( data )
     wavef.close()
 
-#Sargam='s,r,g,m,p,d,n,>s'
 def convert(inf_p, outf_p, freq):
+    """
+    Reads an input text file, strips newlines,
+    and calls create_and_save().
+    Can skip this function is input is defined 
+    as a single string.
+
+    This also opens up possbilities for using 
+    streams, where a continuous input of swars
+    are converted played in real time.
+    """
     swar_string=''
     with open(inf_p,'r') as infile:
         for line in infile.readlines():
@@ -190,6 +255,4 @@ def convert(inf_p, outf_p, freq):
     # print(SwarString)
     create_and_save(swar_string,save_name=outf_p,m_duration=0.5,base_freq=int(freq))
         
-#owncomp=""">s,>sd,>s,>sd,>sd,pm,p,p,m,mr,m,mr,mr,s<d,s,s,rr,sm,r,r,pp,md,p,p,dd,p>s,d,d,>s>s,d>r,>s,>s,>r,>r>s,>r,>sd,>s,dp,d,pm,rm,pd,>s,dp,m,rm,s"""
 
-#create_and_save(owncomp,MDuration=0.5,savename='owncomp',basefreq=1047)

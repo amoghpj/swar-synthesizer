@@ -16,35 +16,35 @@ def swar2freq(swar,basefreq):
     on the scale.
     """
     basefreq_float=float(basefreq) # Perform type conversion once
-    
+
     mapper={
         's':{
-            'shuddh':basefreq,
-            'vakra':basefreq, # Error handling mechanism.
+            'shuddh':1,
+            'vakra':1, # Error handling mechanism.
             },
         'r':{
-            'shuddh':int(1.125*basefreq_float),
-            'vakra':int(1.058*basefreq_float)
+            'shuddh': 1.125,
+            'vakra': 1.058
             },
         'g':{
-            'shuddh':int(1.266*basefreq_float),
-            'vakra':int(1.188*basefreq_float)
+            'shuddh': 1.266,
+            'vakra': 1.188
             },
         'm':{
-            'shuddh':int(1.333*basefreq_float),
-            'vakra':int(1.412*basefreq_float),
+            'shuddh': 1.333,
+            'vakra': 1.412
             },
         'p':{
-            'shuddh':int(1.5*basefreq_float),
-            'vakra':int(1.5*basefreq_float), # Error handling mechanism
+            'shuddh': 1.5,
+            'vakra': 1.5 # Error handling mechanism
             },
         'd':{
-            'shuddh':int(1.688*basefreq_float),
-            'vakra':int(1.586*basefreq_float),
+            'shuddh': 1.688,
+            'vakra': 1.586
             },
         'n':{
-            'shuddh':int(1.898*basefreq_float),
-            'vakra':int(1.78*basefreq_float),
+            'shuddh': 1.898,
+            'vakra': 1.78
             },
         '0':0,
         
@@ -58,22 +58,22 @@ def swar2freq(swar,basefreq):
 
     if swar[0] in allowed_inputs:
         if len(swar)==1:
-            return mapper[swar]['shuddh']
+            return int(mapper[swar]['shuddh'] * basefreq_float)
         elif len(swar)==2:
             if swar[0] in ['<','>']:
                 _oct=swar[0]
                 note=swar[1]
-                return int(octavespecifier(_oct)*float(mapper[note]['shuddh']))
+                return int(octavespecifier(_oct)* mapper[note]['shuddh'] * basefreq_float)
             elif swar[0] in ['s','r','g','m','p','d','n']:
                 note=swar[0]
-                return mapper[note]['vakra']
+                return int(mapper[note]['vakra']* basefreq_float)
 
         elif len(swar)==3:
             _oct=swar[0]
             note=swar[1]
             sor_v=swar[2]
 
-            return int(octavespecifier(_oct)*float(mapper[note]['vakra']))
+            return int(octavespecifier(_oct)*mapper[note]['vakra']*basefreq_float)
     else:
         return mapper['0']
     

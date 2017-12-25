@@ -1,0 +1,10 @@
+m,g^,s,<n^,s,
+<d^,<n^,s,g^,m,
+m,g^,s,<n^,s,
+<d^,<n^,s,g^,m,
+d^,n^,d^,d^,n^,
+d^,m,m,g^,g^,
+m,d^,n^,>s,>s,
+>g^,>s,d^,n^,>s,
+>s,n^,d^,m,g^,
+md^,n^>s,n^d^,mg^,s

@@ -115,9 +115,9 @@ def wf_specifier(freq,a,sr,d):
     
     wf=[]
     taper=0.00 # A 5% taper makes each note sound distinct.
-    for i in range(int((1-taper)*D*float(sr))):
-        wf.append(int(A*math.cos(freq*math.pi*float(i)/float(sr))))
-    for i in range(int((taper)*D*float(sr))):
+    for i in range(int((1.0-taper)*d*float(sr))):
+        wf.append(int(a*math.cos(freq*math.pi*float(i)/float(sr))))
+    for i in range(int((taper)*d*float(sr))):
         wf.append(int(0))
 
     return wf
@@ -169,6 +169,7 @@ def notationreader(swarstring):
     translatedSwars=[]
     all_swars=[]
     single_swar=''
+    beat=0
     for each_raw_matra in swarstring.split(','):
         position=0
         single_swar=''
@@ -193,6 +194,8 @@ def notationreader(swarstring):
             single_swar=''
         translatedSwars.append(all_swars)
         all_swars=[]
+        beat+=1
+    print("Number of beats=",beat)
     return translatedSwars 
 
     
@@ -208,10 +211,10 @@ def create_and_save(rawswars,m_duration=1,save_name='test_swars',base_freq=440,a
     # Combines all the waveforms and writes to file
     # By default, will generate one second per entry in list
     bol=notationreader(rawswars)
+    print("Input processed as follows:")
     print(bol)
     bol_length=len(bol)
     waveform=[]
-    print(bol_length)
     for b in bol:
         if len(b)==1:
             waveform+=wf_specifier(swar2freq(b[0],base_freq),amplitude,sample_rate,m_duration)
@@ -225,6 +228,7 @@ def create_and_save(rawswars,m_duration=1,save_name='test_swars',base_freq=440,a
                 waveform+=wf_specifier(swar2freq(_,base_freq),amplitude,sample_rate,sub_duration*float(m_duration))
 
     # Wave file configuration
+    print("Writing to ", save_name+".wav")
     wavef = wave.open(save_name+'.wav','w')
     wavef.setnchannels(1) # mono
     wavef.setsampwidth(2) 
@@ -236,7 +240,7 @@ def create_and_save(rawswars,m_duration=1,save_name='test_swars',base_freq=440,a
         wavef.writeframesraw( data )
     wavef.close()
 
-def convert(inf_p, outf_p, freq):
+def convert(in_file_path, out_file_path, user_spec_freq,user_spec_duration):
     """
     Reads an input text file, strips newlines,
     and calls create_and_save().
@@ -248,11 +252,18 @@ def convert(inf_p, outf_p, freq):
     are converted played in real time.
     """
     swar_string=''
-    with open(inf_p,'r') as infile:
+    with open(in_file_path,'r') as infile:
         for line in infile.readlines():
             swar_string+=line.strip("\n")
-    print("Input string processed as follows:")
+    #print("Input string processed as follows:")
     # print(SwarString)
-    create_and_save(swar_string,save_name=outf_p,m_duration=0.5,base_freq=int(freq))
+    print("Output will be written to",out_file_path+'.wav')
+    if user_spec_freq is None:
+        print("You did not specify a base frequency, using default = 440 Hz")
+        user_spec_freq=440
+    if user_spec_duration is None:
+        print("You did not specify a matra length, using default = 0.5 s")
+        user_spec_duration=0.5
+    create_and_save(swar_string,save_name=out_file_path,m_duration=user_spec_duration,base_freq=user_spec_freq)#base_freq=int(freq))
         
 

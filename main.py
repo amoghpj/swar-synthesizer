@@ -11,9 +11,10 @@ parser=OptionParser()
 parser.add_option('-i','--infile',dest='infilename',metavar='I')
 #parser.add_option('-o','--outfile',dest='outfilename',metavar='O')
 parser.add_option('-f','--basefreq',dest='basefreq')
-
+parser.add_option('-d','--duration',dest='duration')
 
 (options,args)=parser.parse_args()
-outfilename=options.infilename.split('.')[0]
-synth.convert(options.infilename,outfilename,options.basefreq)
+outfilename=options.infilename.split('.txt')[0]
+
+synth.convert(options.infilename,outfilename,options.basefreq,options.duration)
 # synth.play_soundfile(options.outfilename+'.wav')

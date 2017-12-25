@@ -115,9 +115,9 @@ def wf_specifier(freq,a,sr,d):
     
     wf=[]
     taper=0.00 # A 5% taper makes each note sound distinct.
-    for i in range(int((1-taper)*D*float(sr))):
-        wf.append(int(A*math.cos(freq*math.pi*float(i)/float(sr))))
-    for i in range(int((taper)*D*float(sr))):
+    for i in range(int((1.0-taper)*d*float(sr))):
+        wf.append(int(a*math.cos(freq*math.pi*float(i)/float(sr))))
+    for i in range(int((taper)*d*float(sr))):
         wf.append(int(0))
 
     return wf
@@ -169,6 +169,7 @@ def notationreader(swarstring):
     translatedSwars=[]
     all_swars=[]
     single_swar=''
+    beat=0
     for each_raw_matra in swarstring.split(','):
         position=0
         single_swar=''
@@ -193,6 +194,8 @@ def notationreader(swarstring):
             single_swar=''
         translatedSwars.append(all_swars)
         all_swars=[]
+        beat+=1
+    print("Number of beats=",beat)
     return translatedSwars 
 
     
@@ -225,6 +228,7 @@ def create_and_save(rawswars,m_duration=1,save_name='test_swars',base_freq=440,a
                 waveform+=wf_specifier(swar2freq(_,base_freq),amplitude,sample_rate,sub_duration*float(m_duration))
 
     # Wave file configuration
+    print("Writing to ", save_name+".wav")
     wavef = wave.open(save_name+'.wav','w')
     wavef.setnchannels(1) # mono
     wavef.setsampwidth(2) 
@@ -253,6 +257,7 @@ def convert(inf_p, outf_p, freq):
             swar_string+=line.strip("\n")
     print("Input string processed as follows:")
     # print(SwarString)
+    print("Will write to",outf_p)
     create_and_save(swar_string,save_name=outf_p,m_duration=0.5,base_freq=int(freq))
         
 

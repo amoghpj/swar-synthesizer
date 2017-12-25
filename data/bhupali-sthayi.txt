@@ -1,0 +1,6 @@
+p,g,g,p,g,r,g,p,
+d,>s,>s,d,>s,>r,>s,>s,
+d,>s,>s,d,>s,>r,>g,>g,
+>r,>s,>g,>r,>s,d,p,p,
+g,p,d,p,d,>s,>r,>s,
+d,>g,>r,>s,d,p,g,r,

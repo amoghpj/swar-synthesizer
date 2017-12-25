@@ -14,6 +14,7 @@ parser.add_option('-f','--basefreq',dest='basefreq')
 
 
 (options,args)=parser.parse_args()
-outfilename=options.infilename.split('.')[0]
+outfilename=options.infilename.split('.txt')[0]
+print("Parsed outfilename=",outfilename)
 synth.convert(options.infilename,outfilename,options.basefreq)
 # synth.play_soundfile(options.outfilename+'.wav')

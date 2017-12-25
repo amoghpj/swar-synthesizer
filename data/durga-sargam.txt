@@ -1,0 +1,5 @@
+d,dm,pd,mr,s<d,ss,
+rm,pd,dm,pm,pd,p,
+d>s,>sd,>s>r,>sd,m,p,
+d>s,dp,md,pm,rs,<ds,
+d,dm,pd,mr,s<d,ss

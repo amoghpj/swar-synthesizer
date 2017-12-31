@@ -3,6 +3,7 @@ import math
 import sys
 import struct
 import pyaudio
+import SoundModule as sm
 
 def swar2freq(swar,basefreq):
     """
@@ -122,37 +123,33 @@ def wf_specifier(freq,a,sr,d):
 
     return wf
 
-def play_soundfile(path):
+def playback_once(waveform, sample_rate):
     """
     This code is lifted directly from the PyAudio site.
     It seemes to be truncating the final beat??
     Ask @reckoner165 about how to fix this problem.
     """
-    chunk = 100 # Does this affect performance?
-    
-    # if len(sys.argv) < 2:
-    #     print("Plays a wave file.\n\nUsage: %s filename.wav" % sys.argv[0])
-    #     sys.exit(-1)
-    
-    wf = wave.open(path, 'rb')
-    
     p = pyaudio.PyAudio()
-    
-    stream = p.open(format=p.get_format_from_width(wf.getsampwidth()),
-                    channels=wf.getnchannels(),
-                    rate=wf.getframerate(),
-                    output=True)
-    
-    data = wf.readframes(chunk)
+    stream = p.open(format = pyaudio.paInt16,
+                        channels = 2,
+                        rate = sample_rate,
+                        input = False,
+                        output = True)
 
-    while len(data)>0 :
-        stream.write(data)
-        data = wf.readframes(CHUNK)
+    to_master(waveform, stream)
 
-    stream.stop_stream()
-    stream.close()
-    
-    p.terminate()
+def to_master(x, stream, L=1, R=0):
+
+    # Hard Clip amplitude to fit in bit range
+    for k in range(0,len(x)):
+        if x[k] > 32767:
+            x[k] = 32767
+        elif x[k] < -32768:
+            x[k] = -32768
+
+    str_out = sm.pan_stereo(x, L, R) # Returns a packed struct ready to write
+    stream.write(str_out)
+
     
 def notationreader(swarstring):
     """
@@ -227,6 +224,7 @@ def create_and_save(rawswars,m_duration=1,save_name='test_swars',base_freq=440,a
             for _ in b:
                 waveform+=wf_specifier(swar2freq(_,base_freq),amplitude,sample_rate,sub_duration*float(m_duration))
 
+    playback_once(waveform, sample_rate)
     save_file(waveform,save_name,sample_rate,bol_length)
 
 

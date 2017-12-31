@@ -199,7 +199,7 @@ def notationreader(swarstring):
     return translatedSwars 
 
     
-def create_and_save(rawswars,m_duration=1,save_name='test_swars',base_freq=440,amplitude=32767,sample_rate=4410):
+def create_and_save(rawswars,m_duration=1,save_name='test_swars',base_freq=440,amplitude=32767,sample_rate=44100):
     """
     Function that takes a single input string and 
     converts it to list beats. This is accomplished
@@ -227,6 +227,14 @@ def create_and_save(rawswars,m_duration=1,save_name='test_swars',base_freq=440,a
             for _ in b:
                 waveform+=wf_specifier(swar2freq(_,base_freq),amplitude,sample_rate,sub_duration*float(m_duration))
 
+    save_file(waveform,save_name,sample_rate,bol_length)
+
+
+def save_file(waveform,save_name,sample_rate,bol_length):
+    """
+    Function that opens a wave file instance and writes
+    the output waveform.
+    """
     # Wave file configuration
     print("Writing to ", save_name+".wav")
     wavef = wave.open(save_name+'.wav','w')
@@ -239,6 +247,7 @@ def create_and_save(rawswars,m_duration=1,save_name='test_swars',base_freq=440,a
         data = struct.pack('<h', w)
         wavef.writeframesraw( data )
     wavef.close()
+
 
 def convert(in_file_path, out_file_path, user_spec_freq,user_spec_duration):
     """
